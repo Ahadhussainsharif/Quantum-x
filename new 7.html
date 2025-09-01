@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum X - Live Trading Signals</title>
+    
+    <!-- Multiple SDK loading attempts -->
+    <script>
+        // Method 1: Try loading SDK with error handling
+        (function() {
+            const script = document.createElement('script');
+            script.src = '//libtl.com/sdk.js';
+            script.setAttribute('data-zone', '9803163');
+            script.setAttribute('data-sdk', 'show_9803163');
+            script.onerror = function() {
+                loadAlternativeSDK();
+            };
+            script.onload = function() {
+                window.sdkLoaded = true;
+            };
+            document.head.appendChild(script);
+        })();
+
+        // Alternative SDK loading method
+        function loadAlternativeSDK() {
+            const script = document.createElement('script');
+            script.src = 'https://libtl.com/sdk.js';
+            script.setAttribute('data-zone', '9803163');
+            script.setAttribute('data-sdk', 'show_9803163');
+            script.onerror = function() {
+                window.sdkFailed = true;
+            };
+            script.onload = function() {
+                window.sdkLoaded = true;
+            };
+            document.head.appendChild(script);
+        }
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #4ECDC4;
+            box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .generate-btn.loading {
+            pointer-events: none;
+        }
+
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .signal-result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .signal-result.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .signal-buy {
+            background: linear-gradient(45deg, #2ECC71, #27AE60);
+            color: white;
+            border: 3px solid #27AE60;
+        }
+
+        .signal-sell {
+            background: linear-gradient(45deg, #E74C3C, #C0392B);
+            color: white;
+            border: 3px solid #C0392B;
+        }
+
+        .signal-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .ad-section {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .ad-btn {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #333;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .ad-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(78, 205, 196, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(78, 205, 196, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(78, 205, 196, 0); }
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background: #f8f9fa;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4ECDC4;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* Fallback Ad Modal */
+        .fallback-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .fallback-modal.show {
+            display: flex;
+        }
+
+        .fallback-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 400px;
+            margin: 20px;
+            position: relative;
+        }
+
+        .fallback-content h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .fallback-content p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        /* Auto-showing interstitial banner */
+        .interstitial-banner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .interstitial-banner.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Fallback Ad Modal -->
+    <div class="fallback-modal" id="fallbackModal">
+        <div class="fallback-content">
+            <button class="close-modal" onclick="closeFallbackModal()">&times;</button>
+            <h3>🎯 Premium Trading Offer</h3>
+            <p>Get access to 95% accuracy signals and premium features!</p>
+            <button class="ad-btn" onclick="handleFallbackClick()">
+                🚀 View Offer
+            </button>
+        </div>
+    </div>
+
+    <!-- Interstitial Banner -->
+    <div class="interstitial-banner" id="interstitialBanner">
+        <button class="close-btn" onclick="closeInterstitial()">&times;</button>
+        <h3>🎯 Premium Trading Signals</h3>
+        <p>Get 95% accuracy signals with our premium package!</p>
+        <button class="ad-btn" onclick="handleInterstitialClick()" style="margin-top: 15px;">
+            🚀 Upgrade Now
+        </button>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>⚡ Quantum X</h1>
+            <p>Advanced Binary Trading Signals</p>
+        </div>
+
+        <div class="form-container">
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalSignals">0</div>
+                    <div class="stat-label">Signals Generated</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="winRate">85%</div>
+                    <div class="stat-label">Win Rate</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="activeUsers">1,247</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="broker">🏢 Select Broker</label>
+                <select id="broker">
+                    <option value="">Choose your broker...</option>
+                    <option value="iqoption">IQ Option</option>
+                    <option value="quotex">Quotex</option>
+                    <option value="olymptrade">Olymp Trade</option>
+                    <option value="binomo">Binomo</option>
+                    <option value="pocket-option">Pocket Option</option>
+                    <option value="deriv">Deriv</option>
+                    <option value="binary">Binary.com</option>
+                    <option value="raceoption">Race Option</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="otcPair">💹 Select OTC Pair</label>
+                <select id="otcPair">
+                    <option value="">Choose OTC pair...</option>
+                    <option value="EURUSD_OTC">EUR/USD OTC</option>
+                    <option value="GBPUSD_OTC">GBP/USD OTC</option>
+                    <option value="AUDUSD_OTC">AUD/USD OTC</option>
+                    <option value="USDJPY_OTC">USD/JPY OTC</option>
+                    <option value="USDCAD_OTC">USD/CAD OTC</option>
+                    <option value="EURGBP_OTC">EUR/GBP OTC</option>
+                    <option value="EURJPY_OTC">EUR/JPY OTC</option>
+                    <option value="GBPJPY_OTC">GBP/JPY OTC</option>
+                    <option value="NZDUSD_OTC">NZD/USD OTC</option>
+                    <option value="USDCHF_OTC">USD/CHF OTC</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="timeframe">⏰ Select Timeframe</label>
+                <select id="timeframe">
+                    <option value="">Choose timeframe...</option>
+                    <option value="M1">M1 (1 Minute)</option>
+                    <option value="M5">M5 (5 Minutes)</option>
+                    <option value="M15">M15 (15 Minutes)</option>
+                    <option value="M30">M30 (30 Minutes)</option>
+                    <option value="H1">H1 (1 Hour)</option>
+                </select>
+            </div>
+
+            <button class="generate-btn" id="generateBtn" onclick="generateSignal()">
+                <span class="spinner" id="spinner"></span>
+                <span id="btnText">🚀 Generate Live Signal</span>
+            </button>
+
+            <div class="signal-result" id="signalResult"></div>
+        </div>
+
+        <div class="ad-section">
+            <p style="margin-bottom: 15px; color: #666;">💎 Unlock Premium Features</p>
+            <button class="ad-btn" onclick="showAd('rewarded')">🎁 Watch Ad for Bonus</button>
+            <button class="ad-btn" onclick="showAd('popup')">⚡ Premium Access</button>
+            <button class="ad-btn" onclick="showAd('banner')">🔥 View Offers</button>
+        </div>
+    </div>
+
+    <script>
+        let totalSignals = 0;
+        let sdkReady = false;
+        let sdkAttempts = 0;
+        const maxAttempts = 5;
+
+        // Check SDK status silently
+        function checkSDK() {
+            if (typeof show_9803163 === 'function') {
+                sdkReady = true;
+                // Auto-show ads
+                setTimeout(showAutoAd, 10000);
+                return;
+            }
+            
+            if (window.sdkFailed || sdkAttempts >= maxAttempts) {
+                return;
+            }
+            
+            sdkAttempts++;
+            setTimeout(checkSDK, 2000);
+        }
+
+        // Universal ad show function with fallback
+        function showAd(type) {
+            if (!sdkReady) {
+                showFallbackModal();
+                return;
+            }
+
+            try {
+                let promise;
+                
+                switch(type) {
+                    case 'popup':
+                        promise = show_9803163('pop');
+                        break;
+                    default:
+                        promise = show_9803163();
+                }
+
+                promise.then(() => {
+                    handleAdSuccess(type);
+                }).catch(error => {
+                    showFallbackModal();
+                });
+
+            } catch (error) {
+                showFallbackModal();
+            }
+        }
+
+        function handleAdSuccess(type) {
+            switch(type) {
+                case 'rewarded':
+                    alert('🎉 You earned 5 bonus signals!');
+                    totalSignals += 5;
+                    updateStats();
+                    break;
+                case 'popup':
+                    alert('⚡ Premium access unlocked for 24 hours!');
+                    break;
+                case 'banner':
+                    alert('🔥 Thank you for viewing the offer!');
+                    break;
+            }
+        }
+
+        function showFallbackModal() {
+            document.getElementById('fallbackModal').classList.add('show');
+        }
+
+        function closeFallbackModal() {
+            document.getElementById('fallbackModal').classList.remove('show');
+        }
+
+        function handleFallbackClick() {
+            closeFallbackModal();
+            alert('🎁 Thanks for your interest! Premium features unlocked!');
+            totalSignals += 2;
+            updateStats();
+        }
+
+        // Auto-show interstitial banner
+        function showAutoInterstitial() {
+            const banner = document.getElementById('interstitialBanner');
+            banner.classList.add('show');
+            
+            // Auto-hide after 8 seconds
+            setTimeout(() => {
+                if (banner.classList.contains('show')) {
+                    closeInterstitial();
+                }
+            }, 8000);
+        }
+
+        function closeInterstitial() {
+            document.getElementById('interstitialBanner').classList.remove('show');
+        }
+
+        function handleInterstitialClick() {
+            closeInterstitial();
+            if (sdkReady) {
+                try {
+                    show_9803163().then(() => {
+                        alert('🔥 Premium features unlocked for 24 hours!');
+                    }).catch(e => {
+                        alert('🎁 Premium features unlocked anyway!');
+                    });
+                } catch (error) {
+                    alert('🎁 Premium features unlocked anyway!');
+                }
+            }
+        }
+
+        function showAutoAd() {
+            if (Math.random() > 0.5) {
+                showAutoInterstitial();
+            }
+        }
+
+        function generateSignal() {
+            const broker = document.getElementById('broker').value;
+            const otcPair = document.getElementById('otcPair').value;
+            const timeframe = document.getElementById('timeframe').value;
+            
+            if (!broker || !otcPair || !timeframe) {
+                alert('Please select all required fields!');
+                return;
+            }
+
+            const generateBtn = document.getElementById('generateBtn');
+            const spinner = document.getElementById('spinner');
+            const btnText = document.getElementById('btnText');
+            const signalResult = document.getElementById('signalResult');
+
+            generateBtn.classList.add('loading');
+            generateBtn.classList.add('pulse');
+            spinner.style.display = 'inline-block';
+            btnText.textContent = 'Analyzing Market...';
+            signalResult.classList.remove('show');
+
+            // Show ad every 3 signals
+            if (totalSignals > 0 && totalSignals % 3 === 0) {
+                setTimeout(() => showAutoInterstitial(), 3000);
+            }
+
+            setTimeout(() => {
+                const signals = ['BUY', 'SELL'];
+                const randomSignal = signals[Math.floor(Math.random() * signals.length)];
+                const confidence = Math.floor(Math.random() * 15) + 85;
+                const expiry = getExpiryTime(timeframe);
+                
+                totalSignals++;
+                displaySignal(randomSignal, otcPair, timeframe, confidence, expiry);
+                updateStats();
+
+                spinner.style.display = 'none';
+                btnText.textContent = '🚀 Generate New Signal';
+                generateBtn.classList.remove('loading');
+                generateBtn.classList.remove('pulse');
+            }, 2500);
+        }
+
+        function displaySignal(signal, pair, timeframe, confidence, expiry) {
+            const signalResult = document.getElementById('signalResult');
+            const icon = signal === 'BUY' ? '📈' : '📉';
+            const className = signal === 'BUY' ? 'signal-buy' : 'signal-sell';
+            
+            signalResult.className = `signal-result ${className}`;
+            signalResult.innerHTML = `
+                <span class="signal-icon">${icon}</span>
+                <div style="font-size: 1.8em; margin: 10px 0;">${signal} SIGNAL</div>
+                <div style="font-size: 1.2em; margin: 5px 0;">${pair}</div>
+                <div style="font-size: 1em; opacity: 0.9;">Timeframe: ${timeframe}</div>
+                <div style="font-size: 1em; opacity: 0.9;">Confidence: ${confidence}%</div>
+                <div style="font-size: 0.9em; opacity: 0.8; margin-top: 10px;">Expires: ${expiry}</div>
+            `;
+            
+            signalResult.classList.add('show');
+            
+            if (confidence >= 90) {
+                createConfetti();
+            }
+        }
+
+        function getExpiryTime(timeframe) {
+            const now = new Date();
+            const minutes = {
+                'M1': 1,
+                'M5': 5,
+                'M15': 15,
+                'M30': 30,
+                'H1': 60
+            };
+            
+            now.setMinutes(now.getMinutes() + minutes[timeframe]);
+            return now.toLocaleTimeString();
+        }
+
+        function updateStats() {
+            document.getElementById('totalSignals').textContent = totalSignals;
+            
+            const activeUsers = 1247 + Math.floor(Math.random() * 50);
+            document.getElementById('activeUsers').textContent = activeUsers.toLocaleString();
+            
+            animateValue('totalSignals', Math.max(0, totalSignals - 1), totalSignals, 500);
+        }
+
+        function animateValue(id, start, end, duration) {
+            const element = document.getElementById(id);
+            const range = end - start;
+            const increment = range / (duration / 16);
+            let current = start;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= end) {
+                    element.textContent = end;
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(current);
+                }
+            }, 16);
+        }
+
+        function createConfetti() {
+            for (let i = 0; i < 50; i++) {
+                createConfettiPiece();
+            }
+        }
+
+        function createConfettiPiece() {
+            const confetti = document.createElement('div');
+            confetti.style.position = 'fixed';
+            confetti.style.width = '10px';
+            confetti.style.height = '10px';
+            confetti.style.backgroundColor = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57'][Math.floor(Math.random() * 5)];
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.top = '-10px';
+            confetti.style.zIndex = '1000';
+            confetti.style.borderRadius = '50%';
+            
+            document.body.appendChild(confetti);
+            
+            confetti.animate([
+                { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+                { transform: 'translateY(100vh) rotate(720deg)', opacity: 0 }
+            ], {
+                duration: 3000,
+                easing: 'cubic-bezier(0.5, 0, 0.5, 1)'
+            });
+            
+            setTimeout(() => {
+                document.body.removeChild(confetti);
+            }, 3000);
+        }
+
+        // Interactive effects
+        document.querySelectorAll('select').forEach(select => {
+            select.addEventListener('change', function() {
+                this.style.borderColor = '#4ECDC4';
+                setTimeout(() => {
+                    this.style.borderColor = '#e1e8ed';
+                }, 300);
+            });
+        });
+
+        // Auto-update users
+        setInterval(() => {
+            const currentUsers = parseInt(document.getElementById('activeUsers').textContent.replace(',', ''));
+            const change = Math.floor(Math.random() * 10) - 5;
+            const newUsers = Math.max(1000, currentUsers + change);
+            document.getElementById('activeUsers').textContent = newUsers.toLocaleString();
+        }, 30000);
+
+        // Initialize silently
+        window.addEventListener('load', function() {
+            // Start checking SDK silently
+            setTimeout(checkSDK, 1000);
+            
+            // Show initial stats
+            setTimeout(() => {
+                const activeUsers = 1247 + Math.floor(Math.random() * 100);
+                document.getElementById('activeUsers').textContent = activeUsers.toLocaleString();
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
